@@ -8,6 +8,12 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
+import atom.data
+import gdata.data
+import gdata.contacts.client
+import gdata.contacts.data
+
+
 driver = webdriver.Chrome()
 driver.wait = WebDriverWait(driver, 5)
 
@@ -113,6 +119,23 @@ def scrollAll():
         if new_height == last_height:
             break
         last_height = new_height
+
+
+def create_contact(gd_client, phone_vol):
+    new_contact = gdata.contacts.data.ContactEntry()
+    # Set the contact's name.
+    new_contact.name = gdata.data.Name(
+        given_name=gdata.data.GivenName(text=phone_vol),
+        family_name=gdata.data.FamilyName(text=''),
+        full_name=gdata.data.FullName(text=''))
+    new_contact.content = atom.data.Content(text='Notes')
+    # Set the contact's phone numbers.
+    new_contact.phone_number.append(gdata.data.PhoneNumber(
+        text=phone_vol, rel=gdata.data.HOME_REL, primary='true'))
+    # Send the contact data to the server.
+    contact_entry = gd_client.CreateContact(new_contact)
+    print("Contact's ID: %s", contact_entry.id.text)
+    return contact_entry
 
 
 if __name__ == "__main__":
