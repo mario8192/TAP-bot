@@ -35,16 +35,14 @@ def selectChat(person):
 
 
 def sendMessage(text):
-    if (type(text) == list):
+    if(type(text) == list):
         for line in text:
             driver.find_element_by_css_selector(
                 "div._3u328.copyable-text.selectable-text").send_keys(line)
             driver.find_element_by_css_selector(
                 "div._3u328.copyable-text.selectable-text").send_keys(Keys.SHIFT, Keys.RETURN)
-
         driver.find_element_by_css_selector(
             "div._3u328.copyable-text.selectable-text").send_keys(Keys.RETURN)
-
     else:
         driver.find_element_by_css_selector(
             "div._3u328.copyable-text.selectable-text").send_keys(text)
@@ -81,6 +79,26 @@ def createGroup(group_name, tap_admin, school_admin):
 def sendTo(chat, message):
     selectChat(chat)
     sendMessage(message)
+
+
+def addToGroup(person, group):
+    selectChat(group)
+    ActionChains(driver).click(
+        driver.find_elements_by_css_selector("div._3j8Pd")[-1]).perform()
+    ActionChains(driver).click(driver.find_element_by_css_selector(
+        "li._3cfBY._2yhpw._3BqnP")).perform()
+    time.sleep(0.5)
+    ActionChains(driver).click(
+        driver.find_element_by_css_selector("div._2WP9Q")).perform()
+    driver.find_element_by_css_selector(
+        "input._2zCfw.copyable-text.selectable-text").send_keys(person)
+    time.sleep(0.5)
+    driver.find_element_by_css_selector(
+        "input._2zCfw.copyable-text.selectable-text").send_keys(Keys.ENTER)
+    ActionChains(driver).click(
+        driver.find_element_by_css_selector("div._1AWh3")).perform()
+    ActionChains(driver).click(
+        driver.find_element_by_css_selector("div._2eK7W._3PQ7V")).perform()
 
 
 def scrollAll():
