@@ -13,9 +13,28 @@ import gdata.data
 import gdata.contacts.client
 import gdata.contacts.data
 
+from flask import Flask
+from flask import request
 
 driver = webdriver.Chrome()
 driver.wait = WebDriverWait(driver, 5)
+
+driver.get("https://web.whatsapp.com")
+driver.wait.until(EC.title_is("WhatsApp"))
+
+
+app = Flask(__name__)
+
+# contact_driver = webdriver.Chrome()
+# contact_driver.wait = WebDriverWait(driver, 5)
+# contact_driver.get("https://contacts.google.com")
+# driver.wait.until(EC.title_contains("Sign in"))
+# contact_driver.find_element_by_css_selector("input.whsOnd.zHQkBf").send_keys("jimthariyal")
+# contact_driver.find_element_by_css_selector("input.whsOnd.zHQkBf").send_keys(Keys.ENTER)
+# contact_driver.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR,"span.RveJvd.snByac")))
+# contact_driver.find_element_by_css_selector("input.whsOnd.zHQkBf").send_keys("jimmyjimmyjimmy")
+# contact_driver.find_element_by_css_selector("input.whsOnd.zHQkBf").send_keys(Keys.ENTER)
+
 
 # def init_driver():
 #     driver = webdriver.Chrome()
@@ -24,13 +43,19 @@ driver.wait = WebDriverWait(driver, 5)
 #     return driver
 
 
-def loginCookie(driver):
-    driver.get("https://web.whatsapp.com")
-    driver.wait.until(EC.title_is("WhatsApp"))
-    driver.wait.until(EC.presence_of_element_located((By.ID, "side")))
+# def loginCookie():
+#     driver.get("https://web.whatsapp.com")
+#     driver.wait.until(EC.title_is("WhatsApp"))
+#     driver.wait.until(EC.presence_of_element_located((By.ID, "side")))
 
-    driver.find_element_by_css_selector(
-        "input._44uDJ.copyable-text.selectable-text")
+# driver.find_element_by_css_selector(
+#     "input._44uDJ.copyable-text.selectable-text")
+
+# def loginContact():
+#     contact_driver.find_element_by_css_selector(
+#         "input.whsOnd.zHQkBf").send_keys("jimthariyal")
+#     contact_driver.find_element_by_css_selector(
+#         "input.whsOnd.zHQkBf").send_keys(Keys.ENTER)
 
 
 def selectChat(person):
@@ -56,12 +81,29 @@ def sendMessage(text):
             "div._3u328.copyable-text.selectable-text").send_keys(Keys.RETURN)
 
 
+@app.route('/sendTo', methods=['POST'])
+def sendTo():
+    content = request.get_json()
+    print(content)
+    chat = content['chat']
+    message = content['message']
+    selectChat(chat)
+    sendMessage(message)
+    return "done"
+
+
 def lastMessage():
     return driver.find_elements_by_class_name(
         "message-in")[-1].find_elements_by_tag_name("span")[2].get_attribute("innerHTML")
 
 
-def createGroup(group_name, tap_admin, school_admin):
+@app.route('/createGroup', methods=['POST'])
+def createGroup():
+    content = request.get_json()
+    group_name = content['group_name']
+    tap_admin = content['tap_admin']
+    school_admin = content['school_admin']
+
     ActionChains(driver).click(
         driver.find_elements_by_css_selector("div._3j8Pd")[2]).perform()
     ActionChains(driver).click(
@@ -82,12 +124,12 @@ def createGroup(group_name, tap_admin, school_admin):
         driver.find_element_by_css_selector("div._1g8sv")).perform()
 
 
-def sendTo(chat, message):
-    selectChat(chat)
-    sendMessage(message)
+@app.route('/addToGroup')
+def addToGroup():
 
+    person = request.form['person']
+    group = request.form['group']
 
-def addToGroup(person, group):
     selectChat(group)
     ActionChains(driver).click(
         driver.find_elements_by_css_selector("div._3j8Pd")[-1]).perform()
@@ -107,20 +149,7 @@ def addToGroup(person, group):
         driver.find_element_by_css_selector("div._2eK7W._3PQ7V")).perform()
 
 
-def scrollAll():
-    SCROLL_PAUSE_TIME = 3
-    last_height = driver.execute_script("return document.body.scrollHeight")
-
-    while True:
-        driver.execute_script(
-            "window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(SCROLL_PAUSE_TIME)
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
-            break
-        last_height = new_height
-
-
+@app.route('/create_contact')
 def create_contact(gd_client, phone_vol):
     new_contact = gdata.contacts.data.ContactEntry()
     # Set the contact's name.
@@ -140,4 +169,5 @@ def create_contact(gd_client, phone_vol):
 
 if __name__ == "__main__":
     print("yo")
-    # loginCookie(driver)
+    app.run(debug=True)
+    # loginCookie()
